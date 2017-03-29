@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>WebVTT Demo</title>
+<style>
+.with-caption {
+  box-sizing: border-box;
+  width: 500px;
+  border: 3px solid tomato;
+}
+.with-caption::cue { font-size: 18px; }
+.desc {
+  margin-top: 10px;
+  margin-bottom: 13px;
+  font-size: 14px;
+}
+.view {
+  box-sizing: border-box;
+  width: 500px;
+  height: 150px;
+  padding: 10px;
+  border: 3px solid #ccc;
+  overflow: auto;
+}
+.view ol {
+  margin: 10px 0;
+  font-size: 14px;
+}
+.waiting {
+  color: #ccc;
+}
+</style>
+<script>
+  var logger = new Logger();
+  // 1. HTMLドキュメントの読み込みと解析完了後
+  window.addEventListener('DOMContentLoaded', init, false);
+  function init() {
+    var video = document.querySelector('video');
+    var tracks = video.querySelectorAll('track');
+    tracks.forEach(function(track){
+      // Trackオブジェクトごとにロード完了後にbindLoadTrackを実行する
+      track.addEventListener('load', bindLoadTrack, false);
+    });
+    logger.init(document.getElementById('view'));
+  };
+  // 2. Track要素が読み込まれ、字幕が切り替わった際に、画面を書き換える処理を実行
+  function bindLoadTrack () {
+    // TextTrackオブジェクトを取得する
+    var showingTrack = this.track;
+    var cueList = showingTrack.cues;
+    showingTrack.addEventListener('cuechange', onCueChange, false);
+    for (var i=0; i<cueList.length; i++) {
+      var cue = cueList[i];
+      cue.addEventListener('enter', onEnter, false);
+      cue.addEventListener('exit', onExit, false);
+    }
+  };
+  // 3. キューが変更されたとき
+  function onCueChange () {
+    logger.add('cuechange');
+  };
+  // 4. キューが表示されたとき
+  function onEnter () {
+    if (this.startTime === 0) {
+      logger.delete();
+    }
+    logger.add('enter : ' + this.text);
+  };
+  // 5. キューが消えるとき
+  function onExit () {
+    logger.add('exit : ' + this.text);
+  };
+  // ログ用
+  function Logger () {};
+  Logger.prototype.init = function (el) {
+    this.view = el;
+    this.log = [];
+    return this;
+  };
+  Logger.prototype.add = function (text) {
+    this.log.push(text);
+    this.render();
+  };
+  Logger.prototype.delete = function () {
+    if (this.log.length === 0) {
+      return;
+    }
+    this.log = [];
+    this.render();
+  };
+  Logger.prototype.render = function () {
+    var $ol = document.createElement('ol');
+    this.log.forEach(function(log){
+      var $li = document.createElement('li');
+      $li.textContent = log;
+      $ol.appendChild($li);
+    }.bind(this));
+    this.view.innerHTML = '';
+    this.view.appendChild($ol);
+    this.view.scrollTop = this.view.scrollHeight;
+  };
+</script>
+</head>
+<body>
+  <video class="with-caption" autoplay controls muted>
+    <!-- 読み込む動画ファイルの指定 -->
+    <source src="../assets/movie.mp4" type="video/mp4">
+    <!-- 読み込む字幕ファイルの指定 -->
+    <track label="日本語" srclang="ja" kind="subtitles" src="subtitles-ja.vtt" type="text/vtt" default>
+  </video>
+  <div class="view" id="view"></div>
+</body>
+</html>

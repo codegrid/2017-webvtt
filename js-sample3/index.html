@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>WebVTT Demo</title>
+<style>
+.with-caption {
+  box-sizing: border-box;
+  width: 500px;
+  border: 3px solid tomato;
+}
+.with-caption::cue { font-size: 18px; }
+.desc {
+  margin-top: 10px;
+  margin-bottom: 13px;
+  font-size: 14px;
+}
+.view {
+  box-sizing: border-box;
+  width: 500px;
+  height: 150px;
+  padding: 10px;
+  border: 3px solid #ccc;
+  overflow: auto;
+}
+.view ol {
+  margin: 10px 0;
+  font-size: 14px;
+}
+.waiting {
+  color: #ccc;
+}
+.copyright {
+  margin-top: 15px;
+  font-size: 12px;
+}
+</style>
+<script>
+  window.addEventListener('DOMContentLoaded', init, false);
+
+  function init() {
+    var video = document.querySelector('video');
+    // TextTrackオブジェクトを作成する
+    var subtitles = video.addTextTrack('subtitles', '日本語', 'ja');
+    // 字幕が表示されるようにする
+    subtitles.mode = 'showing';
+    // キューを作成する
+    var cue1 = new VTTCue(0, 11, 'これは字幕です。');
+    var cue2 = new VTTCue(11, 22, 'これもまた、字幕です。');
+    var cue3 = new VTTCue(22, 33, '最後の字幕です。');
+    // キューIDを指定する
+    cue1.id = 'cue1';
+    cue2.id = 'cue2';
+    cue3.id = 'cue3';
+    // TextTrackオブジェクトにキューを追加する
+    subtitles.addCue(cue1);
+    subtitles.addCue(cue2);
+    subtitles.addCue(cue3);
+    // ボタンを押したら、指定したIDを削除する
+    document.querySelectorAll('.btn').forEach(function(btn) {
+      btn.addEventListener('click', function () {
+        removeCueById(this.id);
+        this.disabled = true;
+      }, false);
+    });
+    // 指定したキューIDを削除する
+    function removeCueById (id) {
+      var cue = subtitles.cues.getCueById(id);
+      subtitles.removeCue(cue);
+    };
+  };
+</script>
+</head>
+<body>
+  <video class="with-caption" autoplay controls muted>
+    <!-- 読み込む動画ファイルの指定 -->
+    <source src="../assets/movie.mp4" type="video/mp4">
+  </video>
+  <button class="btn" id="cue1" type="button">cue1を削除する</button>
+  <button class="btn" id="cue2" type="button">cue2を削除する</button>
+  <button class="btn" id="cue3" type="button">cue3を削除する</button>
+</body>
+</html>

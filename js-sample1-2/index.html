@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>WebVTT Demo</title>
+<style>
+.with-caption {
+  box-sizing: border-box;
+  width: 500px;
+  border: 3px solid tomato;
+}
+.with-caption::cue { font-size: 18px; }
+.desc {
+  margin-top: 10px;
+  margin-bottom: 13px;
+  font-size: 14px;
+}
+.view {
+  box-sizing: border-box;
+  width: 500px;
+  padding: 10px;
+  border: 3px solid #ccc;
+}
+.view p {
+  font-size: 20px;
+  margin: 10px 0;
+}
+.waiting {
+  color: #ccc;
+}
+</style>
+<script>
+  // 1. HTMLドキュメントの読み込みと解析完了後
+  window.addEventListener('DOMContentLoaded', init, false);
+  function init() {
+    var video = document.querySelector('video');
+    var tracks = video.querySelectorAll('track');
+    tracks.forEach(function(track){
+      // Trackオブジェクトごとにロード完了後にbindLoadTrackを実行する
+      track.addEventListener('load', bindLoadTrack, false);
+    });
+  };
+  // 2. Track要素が読み込まれ、字幕が切り替わった際に、画面を書き換える処理を実行
+  function bindLoadTrack () {
+    // TextTrackオブジェクトを取得する
+    var showingTrack = this.track;
+    showingTrack.addEventListener('cuechange', render, false);
+  };
+  // 3. 画面を書き換える処理
+  function render () {
+    var $view = document.getElementById('view');
+    var $fragment = document.createDocumentFragment();
+    var $paragraph = document.createElement('p');
+
+    // 画面に字幕が表示されている
+    if (this.activeCues.length > 0) {
+      var activeCue = this.activeCues[0];
+      var $from = document.createElement('div');
+      var $to = document.createElement('div');
+
+      // キューテキストをそのままp要素のテキストとして挿入
+      $paragraph.textContent = activeCue.text;
+
+      // 言語が日本語（ja）である
+      if (activeCue.track.language === 'ja') {
+        $from.textContent = `開始: ${activeCue.startTime}秒`;
+        $to.textContent = `終了: ${activeCue.endTime}秒`;
+      // 言語が日本語（ja）ではない
+      } else {
+        $from.textContent = `Start: ${activeCue.startTime}s`;
+        $to.textContent = `End: ${activeCue.endTime}s`;
+      }
+
+      $fragment.appendChild($paragraph);
+      $fragment.appendChild($from);
+      $fragment.appendChild($to);
+
+    // 画面に字幕が表示されていない
+    } else {
+      $paragraph.textContent = "字幕は表示されていません";
+      $paragraph.classList.add('waiting');
+      $fragment.appendChild($paragraph);
+    }
+
+    // #viewの中身を削除する
+    $view.innerHTML = '';
+    // #viewに$fragmentを挿入する
+    $view.appendChild($fragment);
+  }
+</script>
+</head>
+<body>
+  <video class="with-caption" autoplay controls muted>
+    <!-- 読み込む動画ファイルの指定 -->
+    <source src="../assets/movie.mp4" type="video/mp4">
+    <!-- 読み込む字幕ファイルの指定 -->
+    <track label="日本語" srclang="ja" kind="subtitles" src="subtitles-ja.vtt" type="text/vtt" default>
+    <track label="English" srclang="en" kind="subtitles" src="subtitles-en.vtt" type="text/vtt">
+  </video>
+  <div class="view" id="view"></div>
+</body>
+</html>

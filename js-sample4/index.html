@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>WebVTT Demo</title>
+<style>
+.with-caption {
+  box-sizing: border-box;
+  width: 500px;
+  border: 3px solid tomato;
+}
+.with-caption::cue { font-size: 18px; }
+.desc {
+  margin-top: 10px;
+  margin-bottom: 13px;
+  font-size: 14px;
+}
+.view {
+  box-sizing: border-box;
+  width: 500px;
+  height: 150px;
+  padding: 10px;
+  border: 3px solid #ccc;
+  overflow: auto;
+}
+.view ol {
+  margin: 10px 0;
+  font-size: 14px;
+}
+.waiting {
+  color: #ccc;
+}
+.copyright {
+  margin-top: 15px;
+  font-size: 12px;
+}
+</style>
+<script>
+  window.addEventListener('DOMContentLoaded', init, false);
+
+  function init() {
+    var sfx = new Audio('../assets/sound.mp3');
+    var sounds = sfx.addTextTrack('metadata');
+    // 音源の再生開始が可能になったとき
+    sfx.addEventListener('loadeddata', enableButtons, false);
+
+    // それぞれの音声の開始時間、終了時間、キューIDを登録する
+    sounds.addCue(createCue(0, 0.3, 'dog'));
+    sounds.addCue(createCue(0.5, 1.8, 'bird'));
+    sounds.addCue(createCue(2.0, 3.5, 'tiger'));
+
+    // ボタンを押したら、指定したIDの音声を再生する
+    document.querySelectorAll('.btn').forEach(function(btn) {
+      btn.addEventListener('click', function () {
+        playById(this.id);
+      }, false);
+    });
+
+    // ロード完了後にボタンを有効にする
+    function enableButtons () {
+      document.querySelectorAll('.btn').forEach(function(btn){
+        btn.disabled = false;
+      });
+    };
+
+    // 効果音を追加する
+    function createCue (start, end, id) {
+      // キューの開始時間, キューの終了時間, キューテキスト
+      var cue = new VTTCue(start, end, '');
+      // キューにIDを降る
+      cue.id = id;
+      // キューが終了したら停止する
+      cue.pauseOnExit = true;
+      return cue;
+    };
+
+    // 指定したキューIDを再生する
+    function playById (id) {
+      console.log(sounds);
+      // 再生したいキューを取得する
+      var selectedCue = sounds.cues.getCueById(id);
+      // 再生したいキューのstartTimeを取得し、音声の再生開始位置にする
+      sfx.currentTime = selectedCue.startTime;
+      sfx.play();
+    };
+  };
+</script>
+</head>
+<body>
+ボタンをクリックすると音声が流れます。
+<div>
+  <button type="button" disabled class="btn" id="dog">犬の鳴き声 🐶</button>
+  <button type="button" disabled class="btn" id="bird">鳥の鳴き声 🐦</button>
+  <button type="button" disabled class="btn" id="tiger">虎の鳴き声 🐯</button>
+</div>
+<div class="copyright">
+  音源は<a href="http://maoudamashii.jokersounds.com/" title="フリー音楽素材/魔王魂" target="_blank" rel="noopener noreferrer">フリー音楽素材/魔王魂</a>を使用しています。
+</div>
+</body>
+</html>

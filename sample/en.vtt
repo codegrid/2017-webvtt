@@ -1,0 +1,17 @@
+WEBVTT
+
+NOTE
+This is a track file for English.
+
+00:00:00.000 --> 00:00:15.000
+<v geckotang>This is <b>a cue text</b>. This is displayed on this movie for a caption.
+
+00:00:05.000 --> 00:00:15.000
+<v soto3>And this is also <b>a cue text</b>. This is also displayed on this movie for a caption.
+
+00:00:20.000 --> 00:00:30.000
+<v geckotang>This is <b>a cue text</b>. This is displayed on this movie for a caption.
+
+00:00:25.000 --> 00:00:33.000
+<v soto3>And this is also <b>a cue text</b>. This is also displayed on this movie for a caption.
+

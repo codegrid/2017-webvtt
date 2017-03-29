@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>WebVTT Demo</title>
+<style>
+.with-caption {
+  width: 500px;
+  border: 3px solid tomato;
+}
+.with-caption::cue(.important){
+  font-weight: bold;
+  color: white;
+  background-color: red;
+}
+.with-caption::cue(.red){
+  font-weight: bold;
+  color: red;
+}
+</style>
+</head>
+<body>
+  <video class="with-caption" autoplay controls muted>
+    <!-- 読み込む動画ファイルの指定 -->
+    <source src="../assets/movie.mp4" type="video/mp4">
+    <!-- 読み込む字幕ファイルの指定（日本語） -->
+    <track label="日本語" kind="captions" srclang="ja" src="./ja.vtt" type="text/vtt" default>
+  </video>
+</body>
+</html>

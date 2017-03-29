@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>WebVTT Demo</title>
+<style>
+.with-caption {
+  box-sizing: border-box;
+  width: 500px;
+  border: 3px solid tomato;
+}
+.with-caption::cue { font-size: 18px; }
+.desc {
+  margin-top: 10px;
+  margin-bottom: 13px;
+  font-size: 14px;
+}
+.view {
+  box-sizing: border-box;
+  width: 500px;
+  padding: 10px;
+  border: 3px solid #ccc;
+}
+</style>
+<script>
+  window.addEventListener('DOMContentLoaded', init, false);
+  function init() {
+    // videoオブジェクトを取得する
+    var video = document.querySelector('video');
+    // trackオブジェクトを取得する
+    var track = video.querySelector('track');
+    // metadata.vttが読み込まれた時
+    track.addEventListener('load', bindLoadTrack, false)
+  };
+  function bindLoadTrack () {
+    // キューが切り替わる時
+    this.addEventListener('cuechange', bindCueChange, false)
+  };
+  function bindCueChange () {
+    // TextTrackオブジェクト
+    var textTrack = this.track;
+    // 現在表示されているTextTrackCueListオブジェクトの中から0番目のTextTrackCueオブジェクトを取り出す
+    var activeCue = textTrack.activeCues[0];
+    var cueInfo;
+    var cueData;
+    if (!activeCue) {
+      return;
+    }
+    cueInfo = {
+      start : activeCue.startTime,
+      end   : activeCue.endTime
+    };
+    // キューテキストを文字列からオブジェクトにする
+    cueJson = JSON.parse(activeCue.text)
+    render(cueInfo, cueJson);
+  }
+  function render (cueInfo, cueJson) {
+    var html = `
+      <div>
+        <a href="${cueJson.href}" target="_blank" rel="noopener noreferrer">${cueJson.text}</a>
+      </div>
+      <div>
+        <small>このテキストは${cueInfo.start}秒〜${cueInfo.end}秒まで表示されます。</small>
+      </div>
+    `;
+    document.getElementById('view').innerHTML = html;
+  }
+</script>
+</head>
+<body>
+  <video class="with-caption" autoplay controls muted>
+    <!-- 読み込む動画ファイルの指定 -->
+    <source src="../assets/movie.mp4" type="video/mp4">
+    <!-- 読み込む字幕ファイルの指定（メタデータ） -->
+    <track id="metadata" kind="metadata" src="metadata.vtt" type="text/vtt" default>
+  </video>
+  <div class="desc">
+    下記にmetadata.vttの内容が表示されます。
+  </div>
+  <div class="view" id="view"></div>
+</body>
+</html>
